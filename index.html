@@ -718,7 +718,10 @@ function renderVarGrid(){
     const isHex=/^#[0-9a-fA-F]{3,8}$/.test(val);
     return `<div class="vi"><label>${v.label}<br><span style="font-weight:400;color:#aaa;font-size:11px">${v.desc}</span></label>
       <div class="vi-row">
-        <div id="vc-${v.key}" style="width:34px;height:28px;border-radius:5px;background:${isHex?val:'#ccc'};border:1.5px solid var(--border-s);flex-shrink:0;cursor:pointer" onclick="openColorPicker('${v.key}')"></div>
+        <div style="position:relative;flex-shrink:0">
+          <div id="vc-${v.key}" style="width:34px;height:28px;border-radius:5px;background:${isHex?val:'#ccc'};border:1.5px solid var(--border-s);cursor:pointer" onclick="document.getElementById('vcp-${v.key}').click()"></div>
+          <input type="color" id="vcp-${v.key}" value="${isHex?val:'#000000'}" style="position:absolute;opacity:0;width:0;height:0;top:0;left:0;pointer-events:none" oninput="updV('${v.key}',this.value)">
+        </div>
         <input type="text" value="${val}" id="vt-${v.key}" oninput="updV('${v.key}',this.value)" placeholder="#000000">
       </div>
     </div>`;
@@ -731,10 +734,11 @@ function updV(k,val){
   if(t&&t.value!==val) t.value=val;
   // 色見本divを同期
   const swatch=document.getElementById('vc-'+k);
-  if(swatch){
-    const isValidHex=/^#[0-9a-fA-F]{3,8}$/.test(val);
-    if(isValidHex) swatch.style.background=val;
-  }
+  const isValidHex=/^#[0-9a-fA-F]{6}$/.test(val)||/^#[0-9a-fA-F]{3}$/.test(val);
+  if(swatch&&isValidHex) swatch.style.background=val;
+  // 隠しカラーピッカーを同期
+  const cp=document.getElementById('vcp-'+k);
+  if(cp&&isValidHex) cp.value=val;
   renderPreview('cp-base','cp-base-launcher');
   renderPreview('cp-parts','cp-parts-launcher');
 }
