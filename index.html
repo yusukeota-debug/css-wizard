@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSSウィザード v5</title>
+<title>PKSHA ChatAgent CSSウィザード v5</title>
 <style>
 :root {
   --bg:#fafaf8;--surface:#fff;--border:#e8e6e0;--border-s:#c8c4bc;
@@ -132,8 +132,8 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
 </head>
 <body>
 <div class="wrap">
-  <h1>CSSウィザード</h1>
-  <p class="sub">ベースCSSをもとに、ボタン操作だけで最適なカスタムCSSを生成します</p>
+  <h1>PKSHA ChatAgent CSSウィザード</h1>
+  <p class="sub">ベースCSSをもとに、ボタン操作だけで最適なカスタムCSSを生成します（全パーツ完全対応版 v5）</p>
   <div class="tabs">
     <button class="tab active" onclick="switchTab('base',this)">① 全体の色味</button>
     <button class="tab" onclick="switchTab('parts',this)">② パーツ別カスタマイズ</button>
@@ -430,7 +430,7 @@ const PROPS={
   'resize-bar':     ['非表示'],
   'reload-btn':     ['表示する','非表示','アイコン色'],
   'chat-bg':        ['背景色'],
-  'date':           ['非表示','文字色','文字サイズ'],
+  'date':           ['表示する','非表示','文字色','文字サイズ'],
   'bot-icon':       ['非表示','サイズ','枠線色'],
   'user-icon':      ['非表示','サイズ','枠線色'],
   'font-all':       ['フォント種類','文字サイズ'],
@@ -484,7 +484,8 @@ const PROPS={
 const NOTES={
   'resize-btn':'リサイズ機能が有効な場合のみ表示（Webagentの設定＞外観設定）',
   'resize-bar':'リサイズ機能が有効な場合のみ表示されます',
-  'reload-btn':'デフォルトは非表示です。「表示する」でヘッダーに表示されます',
+  'date':'ベースCSSで非表示（display:none）になっています。表示させるには「表示する」を選んでください。文字色変更だけでは表示されません',
+  'reload-btn':'ベースCSSでデフォルト表示されています。「非表示」で隠すことができます',
   'choice-btn-hover':'マウスオーバー時の背景色を変更します',
   'choice-btn-focus':'スマホタップ時・Tabフォーカス時の枠線スタイルです',
   'cancel-btn-hover':'キャンセルボタンのマウスオーバー時のデザインです',
@@ -550,6 +551,7 @@ function renderPreview(cid,lid){
   const hdrHide =ov('header','非表示',false);
   const chatBg  =ov('chat-bg','背景色',bg);
   const dateHide=ov('date','非表示',false);
+  const dateShow=ov('date','表示する',false);
   const dateCol =ov('date','文字色','#aaa');
   const dateFz  =ov('date','文字サイズ',null);
   const iconSz  =ov('bot-icon','サイズ',30);
@@ -615,14 +617,14 @@ function renderPreview(cid,lid){
 
   c.innerHTML=`
     <div class="p-header" style="background:${hdrBg};border-radius:${r1} ${r1} 0 0;${hdrFz?'font-size:'+hdrFz+'px;':''}${hdrHide==='none'?'display:none;':''}">
-      チャットウィンドウ
       <div style="display:flex;gap:4px;align-items:center">
         ${reloadVisible?`<span style="font-size:13px;opacity:.9;color:${reloadIconColor}" title="対話リセット">↺</span>`:''}
-        <span style="font-size:16px;opacity:.8;${closeBtnFill?'color:'+closeBtnFill:''}">×</span>
+        チャットウィンドウ
       </div>
+      <span style="font-size:16px;opacity:.8;${closeBtnFill?'color:'+closeBtnFill:''}">×</span>
     </div>
     <div class="p-body" id="${cid}-body" style="background:${chatBg}">
-      <div class="p-date" style="${dateHide==='none'?'display:none;':''}color:${dateCol};${dateFz?'font-size:'+dateFz+'px;':''}">2025年4月9日</div>
+      <div class="p-date" style="${dateHide==='none'?'display:none;':dateShow==='block'?'display:block;':'display:none;'}color:${dateCol};${dateFz?'font-size:'+dateFz+'px;':''}">2025年4月9日</div>
       <div class="p-bot-row">
         <div class="p-bot-tip" style="border-color:transparent ${botTipHide==='none'?'transparent':botTipCol} transparent transparent"></div>
         <div class="p-avatar" id="${cid}-avatar" style="${iconHide==='none'?'display:none;':''}width:${iconSzN}px;height:${iconSzN}px;${iconBorder?'border:2px solid '+iconBorder+';':''}">🤖</div>
@@ -897,7 +899,7 @@ function html2(){
     const txt=prop==='枠線非表示'?'枠線を非表示にする（border: none）':'非表示にする（display: none）';
     body=`<div class="chips"><div class="chip sel">${txt}</div></div>`;sCol='__hide__';
   } else if(isSpecial){
-    const txts={'スライドイン有効化':'右からスライドインを有効にする','折り返し有効化':'文言の折り返し表示を有効にする','表示する':'対話リセットボタンを表示する（display: block）','outline非表示':'ランチャー本体のoutlineを非表示にする（outline: none）','初回のみ表示有効化':'初回吹き出しのアイコンのみ表示し、2回目以降は非表示にする'};
+    const txts={'スライドイン有効化':'右からスライドインを有効にする','折り返し有効化':'文言の折り返し表示を有効にする','表示する':wizState.part==='reload-btn'?'対話リセットボタンを再表示する（display: block !important）':'表示する（display: block !important）','outline非表示':'ランチャー本体のoutlineを非表示にする（outline: none）','初回のみ表示有効化':'初回吹き出しのアイコンのみ表示し、2回目以降は非表示にする'};
     body=`<div class="chips"><div class="chip sel">${txts[prop]||prop}</div></div>`;sCol='__special__';
   } else if(isTxt){
     body=`<div class="subq">表示したいボタン名を入力してください</div>
@@ -1007,29 +1009,97 @@ function resetWiz(){partAcc=[];OV={};wizState={part:null,prop:null};expandedCats
 
 // ===== OUTPUT =====
 function buildPartCSS(){
+  // パーツIDごとにベースCSSより詳細度が高いセレクタを定義
+  // ベースCSSに負けないよう、全て同等以上の詳細度にする
+  const STRONG_SEL={
+    'header':          '.panel-heading',
+    'close-btn':       'div#messenger-header .action-button.toggle:after',
+    'resize-btn':      'div#messenger-header .action-button.shrink svg rect',
+    'resize-bar':      '.shrink-handle::before',
+    'reload-btn':      '.action-button.reload',
+    'chat-bg':         'div#message-wrapper',
+    'date':            '.message-wrapper .panel-block time',
+    'bot-icon':        '.media-left img.bot-icon',
+    'bot-icon-index':  '.media-left article[index="0"] img.bot-icon',
+    'bot-icon-img':    'div[data-event-type=image] .media-left img.bot-icon',
+    'user-icon':       '.media-right img.user-icon',
+    'font-all':        '.pc-right, .pc-center',
+    'bot-bubble':      '.panel-block .response .content',
+    'bot-tip':         '.panel-block .response .box.content::after',
+    'user-bubble':     '.panel-block .request .box.content',
+    'user-tip':        '.panel-block .request .box.content::after',
+    'bubble-gap':      '.panel-block .media .content:not(:last-child)',
+    'choice-area':     '.media-content.text ul.buttons',
+    'choice-btn':      '.media-content.text ul.buttons>li[role="button"]',
+    'choice-btn-hover':'.media-content.text ul.buttons>li[role="button"]:hover',
+    'choice-btn-focus':'.media-content.text ul.buttons>li[role="button"]:focus',
+    'choice-url':      '.media-content.text ul.buttons>li[role="button"].url',
+    'choice-row':      '.media-content.text ul.buttons.row',
+    'cancel-btn':      'ul.buttons li.cancel-button',
+    'cancel-btn-hover':'ul.buttons li.cancel-button:hover',
+    'survey-yes':      '.reply-selector a.button.first',
+    'survey-no':       '.reply-selector a.button.is-medium.second.answer-no',
+    'survey-focus':    '.reply-selector a.button:focus',
+    'survey-wrap':     '.reply-selector a.button.is-medium',
+    'carousel':        'ul.carousel',
+    'send-btn':        '#send-message, a.button.send-message',
+    'send-btn-rename': '#send-message::before',
+    'send-btn-sp-rename':'.is-mobile-view #send-message::before',
+    'input':           'textarea#input-box',
+    'input-focus':     'textarea#input-box:focus',
+    'placeholder':     'textarea#input-box::placeholder',
+    'warning':         '#message-sender .warning',
+    'suggestions':     '.suggestions',
+    'upload':          '#upload',
+    'upload-operator': '.is-operator-connected #upload',
+    'input-hide':      '#message-sender',
+    'typing':          '#message-wrapper .is-agent-typing',
+    'link-text':       'a.link-urltext, a.link-url',
+    'lang-panel':      '.language > .panel',
+    'launcher-balloon':'.messenge',
+    'launcher-btn':    '.messenge .button',
+    'launcher-plus':   '.col1 .icon-close',
+    'launcher-close':  '#close-button',
+    'launcher-close-icon':'#close-button svg path',
+    'launcher-outline':'#launcher',
+    'launcher-icon':   '.icon',
+    'launcher-hover':  '.launcher-icon:hover',
+    'launcher-anim':   '.fade-enter-active',
+    'launcher-tab-focus':'#launcher:focus > img',
+    'img-link':        'a.image::after',
+  };
   return partAcc.map(e=>{
-    const p=e.prop,sel=e.sel,val=e.val;
-    if(p==='非表示') return`/* ${e.pl}の${p} */\n${sel} {\n    display: none !important;\n}`;
+    const p=e.prop,val=e.val;
+    const sel=STRONG_SEL[e.partId]||e.sel;
+    if(p==='非表示'){
+      // 閉じる×ボタンはベースCSSで::after疑似要素（content:"\0d7"）として実装されているため
+      // svg gを非表示にしても消えない。::afterのcontentをnoneにする必要がある
+      if(e.partId==='close-btn') return`/* ${e.pl}の${p} */\ndiv#messenger-header .action-button.toggle:after {\n    content: none !important;\n}\ndiv#messenger-header .action-button.toggle {\n    display: none !important;\n}`;
+      return`/* ${e.pl}の${p} */\n${sel} {\n    display: none !important;\n}`;
+    }
     if(p==='枠線非表示') return`/* ${e.pl}の${p} */\n${sel} {\n    border: none !important;\n}`;
     if(p==='表示する') return`/* ${e.pl}の${p} */\n${sel} {\n    display: block !important;\n}`;
-    if(p==='outline非表示') return`/* ${e.pl}の${p} */\n${sel} {\n    outline: none;\n}`;
-    if(p==='折り返し有効化') return`/* ${e.pl}の${p} */\n${sel} {\n    white-space: normal;\n    height: auto;\n    padding-top: 5px;\n    padding-bottom: 5px;\n}`;
+    if(p==='outline非表示') return`/* ${e.pl}の${p} */\n${sel} {\n    outline: none !important;\n}`;
+    if(p==='折り返し有効化') return`/* ${e.pl}の${p} */\n${sel} {\n    white-space: normal !important;\n    height: auto !important;\n    padding-top: 5px !important;\n    padding-bottom: 5px !important;\n}`;
     if(p==='スライドイン有効化') return`/* ランチャースライドインアニメーション */\n.fade-enter-active {\n    transition: opacity 0s !important;\n    transition: right .6s cubic-bezier(0,0,.08,1) .2s !important;\n    position: relative !important;\n    right: -100% !important;\n}\n.fade-enter-to {\n    right: 0% !important;\n}`;
     if(p==='アイコン色') return`/* ${e.pl}の${p} */\n.icon-reload {\n    fill: ${val} !important;\n    stroke: ${val} !important;\n}`;
     if(p==='ボタン名称（テキスト入力）') {
-      // cancel or send rename
       if(e.partId==='cancel-btn-rename') return`/* ${e.pl}の${p} */\nli.cancel-button span {\n    display: none !important;\n}\nli.cancel-button::before {\n    content: "${val}"; /* ボタン名 */\n}`;
-      if(e.partId==='send-btn-rename') return`/* ${e.pl}の${p} */\n#send-message span {\n    display: none !important;\n}\n#send-message::before {\n    content: "${val}"; /* ボタン名 */\n    color: #FFFFFF;\n    font-size: 14px !important;\n}`;
-      if(e.partId==='send-btn-sp-rename') return`/* ${e.pl}の${p} */\n#send-message span {\n    display: none !important;\n}\n.is-mobile-view #send-message::before {\n    content: "${val}"; /* SP時ボタン名 */\n    color: #FFFFFF;\n    font-size: 14px !important;\n}`;
+      if(e.partId==='send-btn-rename') return`/* ${e.pl}の${p} */\n#send-message span {\n    display: none !important;\n}\n#send-message::before {\n    content: "${val}"; /* ボタン名 */\n    color: #FFFFFF !important;\n    font-size: 14px !important;\n}`;
+      if(e.partId==='send-btn-sp-rename') return`/* ${e.pl}の${p} */\n#send-message span {\n    display: none !important;\n}\n.is-mobile-view #send-message::before {\n    content: "${val}"; /* SP時ボタン名 */\n    color: #FFFFFF !important;\n    font-size: 14px !important;\n}`;
     }
-    if(p==='初回のみ表示有効化') return`/* ${e.pl}の${p} */\n/* 初回表示インテントあり：index="0"、なし：index="1" */\narticle[index="0"] .bot-icon {\n    visibility: visible;\n}\n.bot-icon {\n    visibility: hidden;\n}`;
-    if(p==='ホバー画像URL') return`/* ${e.pl}の${p} */\n.launcher-icon:hover img {\n    opacity: 0 !important;\n}\n.launcher-icon:hover {\n    background-image: url('${val}');\n    background-size: contain;\n    background-repeat: no-repeat;\n    background-position: center;\n}`;
+    if(p==='初回のみ表示有効化') return`/* ${e.pl}の${p} */\narticle[index="0"] .bot-icon {\n    visibility: visible !important;\n}\n.bot-icon {\n    visibility: hidden !important;\n}`;
+    if(p==='ホバー画像URL') return`/* ${e.pl}の${p} */\n.launcher-icon:hover img {\n    opacity: 0 !important;\n}\n.launcher-icon:hover {\n    background-image: url('${val}') !important;\n    background-size: contain !important;\n    background-repeat: no-repeat !important;\n    background-position: center !important;\n}`;
     let rule='';
-    if(p==='背景色') rule=`    background-color: ${val} !important; /* 背景色 */`;
-    else if(p==='文字色') rule=`    color: ${val} !important; /* 文字色 */`;
-    else if(p==='枠線色') rule=`    border-color: ${val} !important;\n    border-style: solid !important; /* 枠線色 */`;
-    else if(p==='色変更') rule=`    border-right-color: ${val} !important; /* 先端の色 */`;
-    else if(p==='色変更（fill）') rule=`    fill: ${val} !important;`;
+    if(p==='背景色') rule=`    background-color: ${val} !important;`;
+    else if(p==='文字色') rule=`    color: ${val} !important;`;
+    else if(p==='枠線色') rule=`    border-color: ${val} !important;\n    border-style: solid !important;`;
+    else if(p==='色変更') rule=`    border-right-color: ${val} !important;`;
+    else if(p==='色変更（fill）'){
+      // 閉じる×ボタンはsvgではなく::after疑似要素のcolorで色が決まる
+      if(e.partId==='close-btn') rule=`    color: ${val} !important; /* ×の文字色 */`;
+      else rule=`    fill: ${val} !important;`;
+    }
     else if(p==='色変更（stroke）') rule=`    stroke: ${val} !important;`;
     else if(p==='角丸') rule=`    border-radius: ${val}px !important;`;
     else if(p==='文字サイズ') rule=`    font-size: ${val}px !important;`;
