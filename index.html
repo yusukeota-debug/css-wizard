@@ -131,6 +131,55 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
 </style>
 </head>
 <body>
+
+<!-- ===== パスワード保護 ===== -->
+<div id="auth-screen" style="
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+  display:flex;align-items:center;justify-content:center;font-family:-apple-system,sans-serif;">
+  <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:40px 36px;width:340px;max-width:90vw;text-align:center;backdrop-filter:blur(10px);">
+    <div style="font-size:32px;margin-bottom:8px">🔐</div>
+    <div style="color:#fff;font-size:18px;font-weight:700;margin-bottom:4px">PKSHA CSS Wizard</div>
+    <div style="color:rgba(255,255,255,.5);font-size:12px;margin-bottom:28px">アクセスにはパスワードが必要です</div>
+    <input id="auth-input" type="password" placeholder="パスワードを入力"
+      style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <div id="auth-error" style="color:#ff6b6b;font-size:12px;margin-bottom:10px;min-height:16px"></div>
+    <button onclick="authCheck()"
+      style="width:100%;padding:11px;border-radius:8px;border:none;background:#4f6ef7;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s"
+      onmouseover="this.style.background='#3a57e8'" onmouseout="this.style.background='#4f6ef7'">
+      ログイン
+    </button>
+    <div style="color:rgba(255,255,255,.25);font-size:10px;margin-top:20px">パスワードはSHA-256でハッシュ化されています</div>
+  </div>
+</div>
+
+<script>
+// パスワードのSHA-256ハッシュ値（元のパスワードはここからは復元不可）
+const AUTH_HASH = '660455122cc782c1721800f50f6d84aa5a39e43b8e9ed0c4ea7778f646ef5be3';
+
+// セッション中は再入力不要
+if(sessionStorage.getItem('pksha_auth') === AUTH_HASH){
+  document.getElementById('auth-screen').style.display = 'none';
+}
+
+async function authCheck(){
+  const input = document.getElementById('auth-input').value;
+  if(!input){ document.getElementById('auth-error').textContent = 'パスワードを入力してください'; return; }
+  // Web Crypto APIでSHA-256ハッシュを計算
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  const hash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  if(hash === AUTH_HASH){
+    sessionStorage.setItem('pksha_auth', AUTH_HASH);
+    document.getElementById('auth-screen').style.display = 'none';
+  } else {
+    document.getElementById('auth-error').textContent = 'パスワードが違います';
+    document.getElementById('auth-input').value = '';
+    document.getElementById('auth-input').focus();
+  }
+}
+</script>
+<!-- ===== /パスワード保護 ===== -->
 <div class="wrap">
   <h1>CSSウィザード</h1>
   <p class="sub">ベースCSSをもとに、ボタン操作だけで最適なカスタムCSSを生成します</p>
@@ -652,9 +701,13 @@ function renderPreview(cid,lid){
         <div class="p-sug-item">サジェスト候補 1</div>
         <div class="p-sug-item">サジェスト候補 2</div>
       </div>
-      <div class="p-typing" style="${typHide==='none'?'display:none;':''}">
-        <span style="background:#bbb"></span><span style="background:#bbb"></span><span style="background:#bbb"></span>
-        <span style="font-size:9px;color:#aaa;margin-left:3px">入力中...</span>
+      <div class="p-typing" style="${typHide==='none'?'display:none;':''}display:flex;align-items:flex-start;gap:5px;padding:4px 8px;">
+        <div style="width:${iconSzN}px;height:${iconSzN}px;border-radius:50%;background:#ccc;flex-shrink:0;${iconHide==='none'?'display:none;':''}"></div>
+        <div style="background:${botBg};border-radius:${r1};padding:7px 10px;display:flex;gap:4px;align-items:center">
+          <span style="width:6px;height:6px;border-radius:50%;background:#999;display:inline-block"></span>
+          <span style="width:6px;height:6px;border-radius:50%;background:#999;display:inline-block"></span>
+          <span style="width:6px;height:6px;border-radius:50%;background:#999;display:inline-block"></span>
+        </div>
       </div>
     </div>
     ${inputHide==='none'?'':`
